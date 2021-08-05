@@ -86,6 +86,27 @@ static int fp_init(struct sbi_scratch *scratch)
 	return 0;
 }
 
+// uint64_t rdvtimecmp(){
+//     register unsigned long vtimecmp asm("a0");
+//     asm volatile(".word 0xe0102577\r\n");
+//     return vtimecmp;
+// }
+
+// void wrvtimecmp(uint64_t vtimecmp){
+//     asm volatile(".word 0xe0a01077\r\n");
+// }
+
+// uint64_t rdvtimectl(){
+//     register unsigned long vtimectl asm("a0");
+//     asm volatile(".word 0xf0202577\r\n");
+//     return vtimectl;
+// }
+
+
+// void wrvtimectl(uint64_t vtimectl){
+//     asm volatile(".word 0xf0a01077\r\n");
+// }
+
 static int delegate_traps(struct sbi_scratch *scratch)
 {
 	const struct sbi_platform *plat = sbi_platform_ptr(scratch);
@@ -96,7 +117,8 @@ static int delegate_traps(struct sbi_scratch *scratch)
 		return 0;
 
 	/* Send M-mode interrupts and most exceptions to S-mode */
-	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP | MIP_UVTIMER;
+	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP | MIP_UTIP | MIP_USIP;
+	// interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
 	exceptions = (1U << CAUSE_MISALIGNED_FETCH) | (1U << CAUSE_BREAKPOINT) |
 		     (1U << CAUSE_USER_ECALL);
 	if (sbi_platform_has_mfaults_delegation(plat))
@@ -121,6 +143,10 @@ static int delegate_traps(struct sbi_scratch *scratch)
 
 	csr_write(CSR_MIDELEG, interrupts);
 	csr_write(CSR_MEDELEG, exceptions);
+
+    csr_write(CSR_SIDELEG, 0ULL);
+    csr_write(CSR_SEDELEG, 0ULL);
+	// wrvtimectl(0);
 
 	return 0;
 }
@@ -515,6 +541,27 @@ sbi_hart_switch_mode(unsigned long arg0, unsigned long arg1,
 #endif
 	csr_write(CSR_MSTATUS, val);
 	csr_write(CSR_MEPC, next_addr);
+
+	// sbi_printf("new laputa print\n");
+	
+	// sbi_printf("%s: next_addr 0x%lx\n", __func__, next_addr);
+	// for(int i = 0; i < 10; i++){
+	// 	unsigned long val = *((unsigned long*) next_addr + i * 8);
+	// 	sbi_printf("%s: next_addr[%d] 0x%lx\n", __func__, i, val);
+	// }
+
+	// // sbi_printf("before misa H test\n");
+	// if (misa_extension('H')) {
+	// 	sbi_printf("misa H test succeed!!!!!!\n");
+	// }
+	// sbi_printf("after misa H test\n");
+
+	// sbi_printf("before misa N test\n");
+	// if (misa_extension('N')) {
+	// 	sbi_printf("misa N test succeed!!!!!!\n");
+	// }
+	// sbi_printf("after misa N test\n");
+	
 
 	if (next_mode == PRV_S) {
 		csr_write(CSR_STVEC, next_addr);

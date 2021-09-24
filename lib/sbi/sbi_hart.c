@@ -542,7 +542,7 @@ sbi_hart_switch_mode(unsigned long arg0, unsigned long arg1,
 	csr_write(CSR_MSTATUS, val);
 	csr_write(CSR_MEPC, next_addr);
 
-	// sbi_printf("new laputa print\n");
+	sbi_printf("new laputa print\n");
 	
 	// sbi_printf("%s: next_addr 0x%lx\n", __func__, next_addr);
 	// for(int i = 0; i < 10; i++){

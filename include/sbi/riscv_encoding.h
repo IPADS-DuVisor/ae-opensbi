@@ -88,7 +88,6 @@
 #define IRQ_VS_EXT			10
 #define IRQ_M_EXT			11
 #define IRQ_S_GEXT			12
-#define IRQ_U_VTIMER		16
 
 #define MIP_USIP			(_UL(1) << IRQ_U_SOFT)
 #define MIP_SSIP			(_UL(1) << IRQ_S_SOFT)

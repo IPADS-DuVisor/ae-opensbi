@@ -408,6 +408,9 @@ void __noreturn sbi_init(struct sbi_scratch *scratch)
 		sbi_hart_hang();
 	}
 
+    //if (hartid > 1) {
+    //    sbi_hart_hang();
+    //}
 	/*
 	 * Only the HART supporting privilege mode specified in the
 	 * scratch->next_mode should be allowed to become the coldboot
@@ -417,9 +420,18 @@ void __noreturn sbi_init(struct sbi_scratch *scratch)
 	 * We use a lottery mechanism to select coldboot HART among
 	 * HARTs which satisfy above condition.
 	 */
+	if (next_mode_supported) {
+        if (hartid == 7) {
+            atomic_xchg(&coldboot_lottery, 6);
+            coldboot = TRUE;
+        } else {
+            while (atomic_cmpxchg(&coldboot_lottery, hartid, hartid - 1))
+                wfi();
+        }
+    }
 
-	if (next_mode_supported && atomic_xchg(&coldboot_lottery, 1) == 0)
-		coldboot = TRUE;
+	//if (next_mode_supported && atomic_xchg(&coldboot_lottery, 1) == 0)
+	//	coldboot = TRUE;
 
 	if (coldboot)
 		init_coldboot(scratch, hartid);

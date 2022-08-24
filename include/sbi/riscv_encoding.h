@@ -141,6 +141,7 @@
 #define PMP_R				_UL(0x01)
 #define PMP_W				_UL(0x02)
 #define PMP_X				_UL(0x04)
+#define PMP_V				_UL(0x20)
 #define PMP_A				_UL(0x18)
 #define PMP_A_TOR			_UL(0x08)
 #define PMP_A_NA4			_UL(0x10)

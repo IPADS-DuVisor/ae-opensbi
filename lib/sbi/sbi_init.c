@@ -420,6 +420,10 @@ void __noreturn sbi_init(struct sbi_scratch *scratch)
 	 * We use a lottery mechanism to select coldboot HART among
 	 * HARTs which satisfy above condition.
 	 */
+#if 1
+    if (next_mode_supported && atomic_xchg(&coldboot_lottery, 1) == 0)
+        coldboot = TRUE;
+#else
 	if (next_mode_supported) {
         if (hartid == 7) {
             atomic_xchg(&coldboot_lottery, 6);
@@ -429,7 +433,7 @@ void __noreturn sbi_init(struct sbi_scratch *scratch)
                 wfi();
         }
     }
-
+#endif
 	//if (next_mode_supported && atomic_xchg(&coldboot_lottery, 1) == 0)
 	//	coldboot = TRUE;
 

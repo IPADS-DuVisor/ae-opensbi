@@ -211,6 +211,7 @@ int sbi_hart_pmp_configure(struct sbi_scratch *scratch)
 	unsigned int pmp_count = sbi_hart_pmp_count(scratch);
 	unsigned long pmp_addr = 0, pmp_addr_max = 0;
 
+    static int mem_reg_cnt = 0;
 	if (!pmp_count)
 		return 0;
 
@@ -232,11 +233,20 @@ int sbi_hart_pmp_configure(struct sbi_scratch *scratch)
 		if (reg->flags & SBI_DOMAIN_MEMREGION_MMODE)
 			pmp_flags |= PMP_L;
 		
-        pmp_flags |= PMP_V;
+        //pmp_flags |= PMP_V;
 
 		pmp_addr =  reg->base >> PMP_SHIFT;
-		if (pmp_gran_log2 <= reg->order && pmp_addr < pmp_addr_max)
-			pmp_set(pmp_idx++, pmp_flags, reg->base, reg->order);
+		if (pmp_gran_log2 <= reg->order && pmp_addr < pmp_addr_max) {
+            mem_reg_cnt++;
+            if (mem_reg_cnt % 2 == 0) {
+                pmp_flags |= PMP_V;
+            }
+
+            sbi_printf("Configure pmp pmp_addr 0x%lx,  addr_max: 0x%lx, pmp_count: %d, mem_reg_cnt: %d, base: 0x%lx, order: 0x%lx flag: 0x%x\n", pmp_addr, pmp_addr_max, pmp_count, mem_reg_cnt, reg->base, reg->order, pmp_flags);
+            //if (mem_reg_cnt < 3) {
+            			pmp_set(pmp_idx++, pmp_flags, reg->base, reg->order);
+            //}
+        }
 		else {
 			sbi_printf("Can not configure pmp for domain %s", dom->name);
 			sbi_printf("because memory region address %lx or size %lx is not in range\n",
